@@ -13,6 +13,7 @@ class ErrorConst:
     INVALID_OS= "Invalid OS"
     INVALID_TOKEN_TYPE= "Invalid Token Type"
     INVALID_DEVICE_TYPE= "Invalid Device Type"
+    INVALID_PHONE_NUMBER= "Invalid Phone Number"
     INVALID_COUNTRY_CODE = "Invalid country code"
     USER_ALREADY_EXIST= "User already exists"
     SOMETHING_WENT_WRONG = "Email is already registered"
@@ -22,6 +23,12 @@ class ErrorConst:
     USER_REGISTERED_SUCCESSFULLY="User registered successfully"
     INVALID_DATA= "Invalid Data"
     INTERNAL_SERVER_ERROR= "Internal Server Error"
+    DATA_UPDATED_SUCCESSFULLY="User Data Updated Successfully"
+    USER_DELETED_SUCCESSFULLY="User deleted successfully"
+    TOKEN_REQUIRED= "Refresh Token is required"
+    LOG_OUT_SUCCESSFULL= "Successfully Logged Out"
+    TOKEN_ERROR= "Token Error"
+    UNEXPECTED_ERROR= "Unexpected Error"
 
 def refresh_utility_func(user):
     Refresh = RefreshToken.for_user(user)
