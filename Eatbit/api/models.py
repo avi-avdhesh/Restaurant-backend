@@ -93,7 +93,18 @@ class UserSession(models.Model):
         db_table= "user_sessions"
         ordering= ['-created_at']
    
-
+class Otp(models.Model):
+    id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_id= models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name="otp", db_column="user_id")
+    otp= models.CharField(max_length=10)
+    expiry_time= models.DateTimeField()
+    created_at= models.DateTimeField(auto_now_add=True)
+    updated_at= models.DateTimeField(auto_now=True)
+    deleted_at= models.DateTimeField(null=True, blank=True)
+    # otp_type?
+    class Meta:
+        db_table="otp"
+        ordering=['created_at']
 
 
 

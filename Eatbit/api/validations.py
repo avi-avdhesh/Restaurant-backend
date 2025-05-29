@@ -1,5 +1,6 @@
 import re
 from django.core.validators import validate_email as django_validate_email
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import status
 from rest_framework.response import Response
@@ -43,10 +44,18 @@ class CheckValidations:
             return False
 
     @staticmethod
-    def validate_password(password):
-        # Example: at least 8 chars, 1 uppercase, 1 number
-        pattern = r'^(?=.*[A-Z])(?=.*\d).{8,}$'
-        return bool(re.match(pattern, password))
+    def validate_password(new_password, user=None):
+        try:
+            validate_password(new_password, user=user)
+            return True, []
+        except ValidationError as e:
+            return False, e.messages
+
+    # @staticmethod
+    # def validate_password(password):
+    #     # Example: at least 8 chars, 1 uppercase, 1 number
+    #     pattern = r'^(?=.*[A-Z])(?=.*\d).{8,}$'
+    #     return bool(re.match(pattern, password))
 
     @staticmethod
     def validate_role(role):

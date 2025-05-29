@@ -15,6 +15,7 @@ class ErrorConst:
     INVALID_DEVICE_TYPE= "Invalid Device Type"
     INVALID_PHONE_NUMBER= "Invalid Phone Number"
     INVALID_COUNTRY_CODE = "Invalid country code"
+    INVALID_OTP= "Invalid OTP"
     USER_ALREADY_EXIST= "User already exists"
     SOMETHING_WENT_WRONG = "Email is already registered"
     DEVICE_NOT_VALID= "Device is not valid"
@@ -29,6 +30,20 @@ class ErrorConst:
     LOG_OUT_SUCCESSFULL= "Successfully Logged Out"
     TOKEN_ERROR= "Token Error"
     UNEXPECTED_ERROR= "Unexpected Error"
+    EMAIL_REQUIRED= "Email is required"
+    EMAIL_DOESNT_EXIST ="User with the given email doesn't exist"
+    OTP_SENT= "OTP sent at email"
+    EMAIL_OTP_REQUIRED= "Email and Otp are required"
+    OTP_EXPIRED="OTP has expired"
+    OTP_VERIFIED= "OTP Verified succesfully"
+    PASSWORD_RESET= "Password reset successfully"
+    PASSWORD_CHANGED="Password changed successfully"
+    WRONG_PASSWORD= "Wrong password"
+    OLD_PASSWORD_REQUIRED= "Old Password is required"
+    NEW_PASSWORD_REQUIRED= "New password is required"
+    OTP_DOESNT_EXIST= "OTP doesn't exists!"
+    FAILED_TO_SEND_OTP= "Failed to send OTP email."
+
 
 def refresh_utility_func(user):
     Refresh = RefreshToken.for_user(user)

@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import UserModel, UserSession, UserDevice
-from .serializers import UserSerializer, DeviceSerializer, SessionSerializer, UserUpdateSerializer
+from .models import UserModel, UserSession, UserDevice, Otp
+from .serializers import UserSerializer, DeviceSerializer, SessionSerializer, UserUpdateSerializer, OtpSerializer
 from rest_framework.views import APIView
 from django.db import transaction
 from .validations import CheckValidations
@@ -11,6 +11,14 @@ from rest_framework import status
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
+import random
+from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+import secrets
+from django.core.mail import send_mail
 
 
 # Create your views here.
@@ -340,3 +348,119 @@ class UserLogOut(APIView):
             return json_response(success=False, error=str(e), message=ErrorConst.TOKEN_ERROR, status_code=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return json_response(success=False, message=ErrorConst.UNEXPECTED_ERROR, error=str(e), status_code=status.HTTP_400_BAD_REQUEST)
+
+class ForgetPassword(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return json_response(success=False, message=ErrorConst.EMAIL_REQUIRED ,error=ErrorConst.EMAIL_REQUIRED, status_code= status.HTTP_400_BAD_REQUEST)        
+        try:
+            user = UserModel.objects.get(email=email)
+        except UserModel.DoesNotExist:
+            return json_response(success=False,message=ErrorConst.EMAIL_DOESNT_EXIST, error=ErrorConst.EMAIL_DOESNT_EXIST, status_code=status.HTTP_404_NOT_FOUND) 
+        # otp = random.randint(100000,999999)
+        otp = secrets.randbelow(900000) + 100000  # ensures 6-digit secure OTP
+        expiry_time= timezone.now() + timedelta(minutes=10)
+        # (this constant 10 minutes can be variable saved in settings)
+        # otp_data= {
+        #             "user_id" : user.id,
+        #             "otp" : otp,
+        #             "expiry_time" : expiry_time,
+        #         }
+        # otp_serializer= OtpSerializer(data=otp_data)
+        # if otp_serializer.is_valid():
+        #     otp_serializer.save()
+        # else:
+        #     return json_response(success=False, message=ErrorConst.INVALID_DATA, error=otp_serializer.errors, status=status.HTTP_400_BAD_REQUEST )    
+        try:
+            with transaction.atomic():
+                Otp.objects.update_or_create(
+                user_id=user,
+                defaults={"otp": otp, "expiry_time": expiry_time}
+                )
+
+                send_mail(
+                    subject= "OTP Verification",
+                    message= f'Your OTP code is {otp}. It will expire at 10 minutes.',
+                    from_email= settings.EMAIL_HOST_USER,
+                    recipient_list= [email],
+                    fail_silently= False,
+                )
+                return json_response(success=True, message=ErrorConst.OTP_SENT, status_code=status.HTTP_200_OK)
+        except Exception as e:
+            return json_response(success=False,error=str(e), message=ErrorConst.FAILED_TO_SEND_OTP, status_code=status.HTTP_400_BAD_REQUEST)
+
+class OtpVerify(APIView):
+    def post(self,request):
+        otp = request.data.get("otp")
+        email = request.data.get("email")
+        if not otp or not email:
+            return json_response(success=False, error=ErrorConst.EMAIL_OTP_REQUIRED, status_code=status.HTTP_400_BAD_REQUEST)            
+        try:     
+            user = UserModel.objects.get(email=email)
+        except UserModel.DoesNotExist:
+            return json_response(success=False, error= ErrorConst.EMAIL_DOESNT_EXIST, status_code=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user_otp = Otp.objects.get(user_id=user.id)
+        except Otp.DoesNotExist:
+            return json_response(success=False, error= ErrorConst.OTP_DOESNT_EXIST, status_code=status.HTTP_404_NOT_FOUND)  
+
+        if int(user_otp.otp) != int(otp):
+            return json_response(success=False, error=ErrorConst.INVALID_OTP, status_code=status.HTTP_400_BAD_REQUEST)
+        
+        if user_otp.expiry_time < timezone.now():
+            return json_response(success=False, error=ErrorConst.OTP_EXPIRED, status_code=status.HTTP_400_BAD_REQUEST)
+        user_otp.delete()
+        return json_response(success=True, message=ErrorConst.OTP_VERIFIED, status_code=status.HTTP_200_OK)
+
+class ResetPassword(APIView):
+    def post(self,request):
+        new_password= request.data.get("new_password")
+        # confirm_password= request.data.get("confirm_password")
+        # if not all([new_password, confirm_password]):
+        #     return Response({"error" : "New Passowrd, Confirm Password are required"}, status=status.HTTP_400_BAD_REQUEST)
+        # if new_password != confirm_password:
+        #     return Response({"error" : "Passwords doesn't match"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = request.data.get('email')
+        if not email:
+            return json_response(success=False, message=ErrorConst.EMAIL_REQUIRED, error= ErrorConst.EMAIL_REQUIRED, status_code=status.HTTP_400_BAD_REQUEST)
+        if not new_password:
+            return json_response(success=False, message=ErrorConst.NEW_PASSWORD_REQUIRED, error= ErrorConst.NEW_PASSWORD_REQUIRED, status_code=status.HTTP_400_BAD_REQUEST)
+        try:
+            user= UserModel.objects.get(email=email)
+        except UserModel.DoesNotExist:
+            return json_response(success=False,message=ErrorConst.EMAIL_DOESNT_EXIST, error= ErrorConst.EMAIL_DOESNT_EXIST, status_code=status.HTTP_400_BAD_REQUEST)
+        
+        is_valid, errors= CheckValidations.validate_password(new_password, user)
+        if not is_valid:
+            return json_response(success=False, error=errors, message=ErrorConst.INVALID_PASSWORD, status_code=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return json_response(success=True, message= ErrorConst.PASSWORD_RESET, status_code=status.HTTP_200_OK)
+
+class ChangePassword(APIView):
+    authentication_classes= [CustomTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self,request):
+        user= request.user
+        old_password= request.data.get("old_password")
+        new_password= request.data.get("new_password")
+        if not new_password:
+            return json_response(success=False, message=ErrorConst.NEW_PASSWORD_REQUIRED, error=ErrorConst.NEW_PASSWORD_REQUIRED, status_code=status.HTTP_400_BAD_REQUEST)
+        if not old_password:
+            return json_response(success=False, message=ErrorConst.OLD_PASSWORD_REQUIRED, error=ErrorConst.OLD_PASSWORD_REQUIRED, status_code=status.HTTP_400_BAD_REQUEST)
+        if not user.check_password(old_password):
+            return json_response(success=False, message=ErrorConst.WRONG_PASSWORD, error=ErrorConst.WRONG_PASSWORD, status_code=status.HTTP_400_BAD_REQUEST)
+        is_valid, errors= CheckValidations.validate_password(new_password, user)
+        if not is_valid:
+            return json_response(success=False, error=errors, message=ErrorConst.INVALID_PASSWORD, status_code=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return json_response(success=True, message=ErrorConst.PASSWORD_CHANGED, status_code=status.HTTP_200_OK)
+
+
+
+
+

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel, UserDevice, UserSession
+from .models import UserModel, UserDevice, UserSession, Otp
 
 class UserSerializer(serializers.ModelSerializer):
     password= serializers.CharField(write_only=True)
@@ -27,3 +27,9 @@ class SessionSerializer(serializers.ModelSerializer):
         model= UserSession
         fields= ["id","user_id","device_id","token_type","access_token","refresh_token","created_at","updated_at"]
         read_only_fields=["created_at","updated_at"]
+
+class OtpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Otp
+        fields= ["id","user_id","otp","expiry_time","created_at","updated_at"]
+        read_only_fields= ["created_at","updated_at"]   
