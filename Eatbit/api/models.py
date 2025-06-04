@@ -109,7 +109,7 @@ class Otp(models.Model):
 
 class Menu_category(models.Model):
     id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name= models.CharField(max_length=225)
+    name= models.CharField(max_length=225, default="default")
     status= models.CharField(choices=Status.choices, default=Status.ACTIVE)
     created_at= models.DateTimeField(auto_now_add=True)
     updated_at= models.DateTimeField(auto_now=True)
@@ -118,6 +118,7 @@ class Menu_category(models.Model):
 class Menu_sub_category(models.Model):
     id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     category_id= models.ForeignKey(Menu_category, on_delete=models.CASCADE, related_name="menu_sub_category", db_column="category_id")
+    name= models.CharField(max_length=225, default="default")
     status= models.CharField(choices=Status.choices, default=Status.ACTIVE)
     created_at= models.DateTimeField(auto_now_add=True)
     updated_at= models.DateTimeField(auto_now=True)
@@ -125,10 +126,10 @@ class Menu_sub_category(models.Model):
 
 class Menu_items(models.Model):
     id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name= models.CharField(max_length=225)
+    name= models.CharField(max_length=225, default="default")
     desc= models.CharField(max_length=225)
     image_url = models.URLField(max_length=500)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     category_id= models.ForeignKey(Menu_category, on_delete=models.CASCADE, related_name="menu_items", db_column="category_id")
     sub_category_id= models.ForeignKey(Menu_sub_category, on_delete=models.CASCADE,related_name="menu_items", db_column="sub_category_id")     
     status= models.CharField(choices=Status.choices, default=Status.ACTIVE)
@@ -138,9 +139,9 @@ class Menu_items(models.Model):
 
 class Menu_add_on_items(models.Model):
     id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name= models.CharField(max_length=225)
+    name= models.CharField(max_length=225, default="default")
     menu_items= models.ForeignKey(Menu_items, on_delete=models.CASCADE, related_name="menu_add_on_items", db_column="menu_items_id")
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status= models.CharField(choices=Status.choices, default=Status.ACTIVE)
     created_at= models.DateTimeField(auto_now_add=True)
     updated_at= models.DateTimeField(auto_now=True)

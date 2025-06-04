@@ -39,7 +39,7 @@ class MenuCategorySerializer(serializers.ModelSerializer):
         model= Menu_category
         fields=["id","name","status","created_at","updated_at"]
         read_only_fields=["created_at", "updated_at"]
-        
+
     def update(self, instance, validated_data):
         if 'status' not in validated_data:
             validated_data['status'] = instance.status or Menu_category._meta.get_field('status').default
@@ -48,8 +48,13 @@ class MenuCategorySerializer(serializers.ModelSerializer):
 class MenuSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model= Menu_sub_category
-        fields= ["id","category_id","status","created_at","updated_at"]
+        fields= ["id","name","category_id","status","created_at","updated_at"]
         read_only_fields=["created_at", "updated_at"]
+
+    def update(self, instance, validated_data):
+        if 'status' not in validated_data:
+            validated_data['status'] = instance.status or Menu_sub_category._meta.get_field('status').default
+        return super().update(instance, validated_data)  
 
 class MenuItemSerializer(serializers.ModelSerializer):
     class Meta:

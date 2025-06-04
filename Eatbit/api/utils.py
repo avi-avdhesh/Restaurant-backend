@@ -44,10 +44,15 @@ class ErrorConst:
     OTP_DOESNT_EXIST= "OTP doesn't exists!"
     FAILED_TO_SEND_OTP= "Failed to send OTP email."
     CATEGORY_EXISTS= "Category already exists!"
+    CATEGORY_DOESNT_EXISTS= "Category does not exists!"
     CATEGORY_SAVED= "Category saved successfully"
     INVALID_CATEGORY_ID= "Invalid category ID"
     CATEGORY_UPDATED= "Category updated successfully"
     CATEGORY_DELETED= "Category deleted successfully"
+    INVALID_SUB_CATEGORY_ID= "Invalid sub category ID"
+    SUB_CATEGORY_EXISTS= "SubCategory already exists!"
+    SUB_CATEGORY_UPDATED= "SubCategory updated successfully"
+    SUB_CATEGORY_DELETED= "subCategory deleted successfully"
 
 
 
