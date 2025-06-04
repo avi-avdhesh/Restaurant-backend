@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel, UserDevice, UserSession, Otp
+from .models import UserModel, UserDevice, UserSession, Otp, Menu_category, Menu_sub_category, Menu_items, Menu_add_on_items
 
 class UserSerializer(serializers.ModelSerializer):
     password= serializers.CharField(write_only=True)
@@ -33,3 +33,32 @@ class OtpSerializer(serializers.ModelSerializer):
         model= Otp
         fields= ["id","user_id","otp","expiry_time","created_at","updated_at"]
         read_only_fields= ["created_at","updated_at"]   
+
+class MenuCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Menu_category
+        fields=["id","name","status","created_at","updated_at"]
+        read_only_fields=["created_at", "updated_at"]
+        
+    def update(self, instance, validated_data):
+        if 'status' not in validated_data:
+            validated_data['status'] = instance.status or Menu_category._meta.get_field('status').default
+        return super().update(instance, validated_data)    
+
+class MenuSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Menu_sub_category
+        fields= ["id","category_id","status","created_at","updated_at"]
+        read_only_fields=["created_at", "updated_at"]
+
+class MenuItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Menu_items
+        fields=["id","name","desc","image_url","price","category_id","sub_category_id","status","created_at","updated_at"]
+        read_only_fields=["created_at", "updated_at"]
+
+class MenuAddOnItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Menu_add_on_items
+        fields=["id","name","menu_items","price","status","created_at","updated_at"]
+        read_only_fields=["created_at", "updated_at"]

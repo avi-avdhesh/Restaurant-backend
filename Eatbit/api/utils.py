@@ -43,6 +43,14 @@ class ErrorConst:
     NEW_PASSWORD_REQUIRED= "New password is required"
     OTP_DOESNT_EXIST= "OTP doesn't exists!"
     FAILED_TO_SEND_OTP= "Failed to send OTP email."
+    CATEGORY_EXISTS= "Category already exists!"
+    CATEGORY_SAVED= "Category saved successfully"
+    INVALID_CATEGORY_ID= "Invalid category ID"
+    CATEGORY_UPDATED= "Category updated successfully"
+    CATEGORY_DELETED= "Category deleted successfully"
+
+
+
 
 
 def refresh_utility_func(user):

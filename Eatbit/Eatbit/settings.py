@@ -105,7 +105,7 @@ WSGI_APPLICATION = 'Eatbit.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Restaurant_db',
+        'NAME': 'restaurant_db',
         'USER': 'postgres',
         'PASSWORD': '12345',
         'HOST': 'localhost',  # or your DB server IP

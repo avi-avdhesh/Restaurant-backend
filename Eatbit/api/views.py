@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import UserModel, UserSession, UserDevice, Otp
-from .serializers import UserSerializer, DeviceSerializer, SessionSerializer, UserUpdateSerializer, OtpSerializer
+from .models import UserModel, UserSession, UserDevice, Otp, Menu_category, Menu_sub_category, Menu_items, Menu_add_on_items
+from .serializers import UserSerializer, DeviceSerializer, SessionSerializer, UserUpdateSerializer, OtpSerializer, MenuCategorySerializer, MenuSubCategorySerializer, MenuItemSerializer, MenuAddOnItemsSerializer
 from rest_framework.views import APIView
 from django.db import transaction
 from .validations import CheckValidations
@@ -19,6 +19,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 import secrets
 from django.core.mail import send_mail
+# from uuid import UUID
+
 
 
 # Create your views here.
@@ -460,6 +462,135 @@ class ChangePassword(APIView):
         user.save()
         return json_response(success=True, message=ErrorConst.PASSWORD_CHANGED, status_code=status.HTTP_200_OK)
 
+class MenuCategory(APIView):
+    def post(self,request):
+        try:
+            with transaction.atomic():
+                data= request.data
+                name=data.get("name",None)
+                statusField=data.get("status", None)
+                required_fields= {
+                    "Name": name
+                }
+                if (validation_response := CheckValidations.check_missing_fields(required_fields=required_fields)):
+                    return validation_response
+                if statusField:
+                    if not CheckValidations.validate_status(statusField):
+                        return json_response(success=False, result={}, message=ErrorConst.INVALID_STATUS, error=ErrorConst.INVALID_STATUS, status_code=status.HTTP_400_BAD_REQUEST)    
+                if Menu_category.objects.filter(name=name).exists():
+                    return json_response(success=False, message=ErrorConst.CATEGORY_EXISTS, error=ErrorConst.CATEGORY_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+                category_data={
+                    "name" : name,
+                    "status" : statusField
+                }
+                category_data= {i:j for i,j in category_data.items() if j is not None}
+                serializer= MenuCategorySerializer(data=category_data)
+                if serializer.is_valid():
+                    category= serializer.save()
+                    response_data= {
+                        "id" : category.id,
+                        "name" : category.name,
+                        "status" : category.status,
+                        "created_at" : category.created_at,
+                        "updated_at" : category.updated_at
+                    }
+                    return json_response(success=True, message=ErrorConst.CATEGORY_SAVED, result=response_data, status_code=status.HTTP_201_CREATED)
+                return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self,request,id=None):
+        try:
+            with transaction.atomic():
+                try:
+                   category= Menu_category.objects.get(id=id)
+                except Menu_category.DoesNotExist:
+                    json_response(success=False, message=ErrorConst.INVALID_CATEGORY_ID, error=ErrorConst.INVALID_CATEGORY_ID, status_code=status.HTTP_400_BAD_REQUEST)
+                
+                data= request.data
+                name=data.get("name",None)
+                statusField=data.get("status", None)
+                required_fields= {
+                    "Name": name
+                }
+                if (validation_response := CheckValidations.check_missing_fields(required_fields=required_fields)):
+                    return validation_response
+                if statusField:
+                    if not CheckValidations.validate_status(statusField):
+                        return json_response(success=False, result={}, message=ErrorConst.INVALID_STATUS, error=ErrorConst.INVALID_STATUS, status_code=status.HTTP_400_BAD_REQUEST)    
+                if Menu_category.objects.filter(name=name).exclude(id=category.id).exists():
+                    return json_response(success=False, message=ErrorConst.CATEGORY_EXISTS, error=ErrorConst.CATEGORY_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+                category_data={
+                    "name" : name,
+                    "status" : statusField
+                }
+                category_data= {i:j for i,j in category_data.items() if j is not None}
+
+                serializer= MenuCategorySerializer(category, data=category_data)  
+                if serializer.is_valid():
+                    update_category= serializer.save()
+                    response_data= {
+                        "id" : update_category.id,
+                        "name" : update_category.name,
+                        "status" : update_category.status,
+                        "created_at" : update_category.created_at,
+                        "updated_at" : update_category.updated_at
+                    }
+                    return json_response(success=True, message=ErrorConst.CATEGORY_UPDATED, result=response_data, status_code=status.HTTP_200_OK)
+                return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    def patch(self,request,id=None):
+        try:
+            with transaction.atomic():
+                try:
+                   category= Menu_category.objects.get(id=id)
+                except Menu_category.DoesNotExist:
+                    json_response(success=False, message=ErrorConst.INVALID_CATEGORY_ID, error=ErrorConst.INVALID_CATEGORY_ID, status_code=status.HTTP_400_BAD_REQUEST)
+                data= request.data
+                name=data.get("name",None)
+                statusField=data.get("status", None)
+                if statusField:
+                    if not CheckValidations.validate_status(statusField):
+                        return json_response(success=False, result={}, message=ErrorConst.INVALID_STATUS, error=ErrorConst.INVALID_STATUS, status_code=status.HTTP_400_BAD_REQUEST)    
+                if name:
+                    if Menu_category.objects.filter(name=name).exclude(id=category.id).exists():
+                        return json_response(success=False, message=ErrorConst.CATEGORY_EXISTS, error=ErrorConst.CATEGORY_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+                category_data={
+                    "name" : name,
+                    "status" : statusField
+                }
+                category_data= {i:j for i,j in category_data.items() if j is not None}
+
+                serializer= MenuCategorySerializer(category,data=category_data, partial=True)  
+                if serializer.is_valid():
+                    update_category= serializer.save()
+                    response_data= {
+                        "id" : update_category.id,
+                        "name" : update_category.name,
+                        "status" : update_category.status,
+                        "created_at" : update_category.created_at,
+                        "updated_at" : update_category.updated_at
+                    }
+                    return json_response(success=True, message=ErrorConst.CATEGORY_UPDATED, result=response_data, status_code=status.HTTP_200_OK)
+                return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self,request,id=None):
+        try:
+            with transaction.atomic():
+                try:
+                   category= Menu_category.objects.get(id=id)
+                except Menu_category.DoesNotExist:
+                    json_response(success=False, message=ErrorConst.INVALID_CATEGORY_ID, error=ErrorConst.INVALID_CATEGORY_ID, status_code=status.HTTP_400_BAD_REQUEST)
+                category.delete()
+                return json_response(success=True, message=ErrorConst.CATEGORY_DELETED,status_code=status.HTTP_200_OK)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+      
 
 
 
