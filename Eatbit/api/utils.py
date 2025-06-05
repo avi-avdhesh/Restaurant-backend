@@ -51,8 +51,15 @@ class ErrorConst:
     CATEGORY_DELETED= "Category deleted successfully"
     INVALID_SUB_CATEGORY_ID= "Invalid sub category ID"
     SUB_CATEGORY_EXISTS= "SubCategory already exists!"
+    SUB_CATEGORY_DOESNT_EXISTS= "Sub-Category does not exists!"
     SUB_CATEGORY_UPDATED= "SubCategory updated successfully"
     SUB_CATEGORY_DELETED= "subCategory deleted successfully"
+    ITEM_ADDED= "Item added successfully!"
+    INVALID_ITEM_ID= "Invalid Item ID"
+    ITEM_UPDATED= "Item updated successfully"
+    ITEM_EXISTS="Item already exists!"
+    ITEM_DELETED= "Item deleted successfully!"
+
 
 
 
