@@ -72,3 +72,8 @@ class MenuAddOnItemsSerializer(serializers.ModelSerializer):
         model= Menu_add_on_items
         fields=["id","name","menu_items","price","status","created_at","updated_at"]
         read_only_fields=["created_at", "updated_at"]
+
+    def update(self, instance, validated_data):
+        if 'status' not in validated_data:
+            validated_data['status'] = instance.status or Menu_sub_category._meta.get_field('status').default
+        return super().update(instance, validated_data)     

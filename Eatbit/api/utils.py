@@ -52,13 +52,22 @@ class ErrorConst:
     INVALID_SUB_CATEGORY_ID= "Invalid sub category ID"
     SUB_CATEGORY_EXISTS= "SubCategory already exists!"
     SUB_CATEGORY_DOESNT_EXISTS= "Sub-Category does not exists!"
+    SUB_CATEGORY_SAVED= "Sub Category saved successfully"
     SUB_CATEGORY_UPDATED= "SubCategory updated successfully"
     SUB_CATEGORY_DELETED= "subCategory deleted successfully"
     ITEM_ADDED= "Item added successfully!"
     INVALID_ITEM_ID= "Invalid Item ID"
     ITEM_UPDATED= "Item updated successfully"
     ITEM_EXISTS="Item already exists!"
+    ITEM_DOESNT_EXISTS="Item does not exists!"
     ITEM_DELETED= "Item deleted successfully!"
+    ADD_ON_EXISTS= "Add On already exists for this item!"
+    ADD_ON_SAVED= "Add On saved successfully"
+    INVALID_ADD_ON_ID= "Invalid add on ID"
+    ADD_ON_UPDATED= "Add On updated successfully"
+    NEED_BOTH_NAME_ITEM_ID= "To update either name or item id, you need to provide both"
+    ADD_ON_DELETED= "Add On deleted successfully"
+
 
 
 

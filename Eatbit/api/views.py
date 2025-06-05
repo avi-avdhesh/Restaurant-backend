@@ -631,7 +631,7 @@ class MenuSubCategory(APIView):
                         "created_at" : sub_category.created_at,
                         "updated_at" : sub_category.updated_at
                     }
-                    return json_response(success=True, message=ErrorConst.CATEGORY_SAVED, result=response_data, status_code=status.HTTP_201_CREATED)
+                    return json_response(success=True, message=ErrorConst.SUB_CATEGORY_SAVED, result=response_data, status_code=status.HTTP_201_CREATED)
                 return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -941,5 +941,174 @@ class MenuItems(APIView):
                     return json_response(success=False, message=ErrorConst.INVALID_ITEM_ID, error=ErrorConst.INVALID_ITEM_ID, status_code=status.HTTP_400_BAD_REQUEST)
                 item.delete()
                 return json_response(success=True, message=ErrorConst.ITEM_DELETED,status_code=status.HTTP_200_OK)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MenuAddOnItem(APIView):
+    def post(self,request):
+        try:
+            with transaction.atomic():
+                data=request.data
+                name= data.get("name",None)
+                menu_items= data.get("menu_items_id", None)
+                price= data.get("price", None)
+                statusField= data.get("status", None)
+                required_fields= {
+                    "Name": name,
+                    "Item Id" : menu_items,
+                    "Price" : price,
+                }
+                if (validation_response := CheckValidations.check_missing_fields(required_fields=required_fields)):
+                    return validation_response
+                if statusField:
+                    if not CheckValidations.validate_status(statusField):
+                        return json_response(success=False, result={}, message=ErrorConst.INVALID_STATUS, error=ErrorConst.INVALID_STATUS, status_code=status.HTTP_400_BAD_REQUEST)    
+                
+                if Menu_add_on_items.objects.filter(name=name, menu_items=menu_items).exists():
+                    return json_response(success=False, message=ErrorConst.ADD_ON_EXISTS, error=ErrorConst.ADD_ON_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+                
+                if not Menu_items.objects.filter(id=menu_items).exists():
+                    return json_response(success=False, message=ErrorConst.ITEM_DOESNT_EXISTS, error=ErrorConst.ITEM_DOESNT_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+
+                add_on_data={
+                    "name" : name,
+                    "menu_items" : menu_items,
+                    "price" : price,
+                    "status" : statusField
+                }
+                add_on_data= {i:j for i,j in add_on_data.items() if j is not None}
+                serializer= MenuAddOnItemsSerializer(data=add_on_data)
+                if serializer.is_valid():
+                    add_on= serializer.save()
+                    response_data= {
+                        "id" : add_on.id,
+                        "name" : add_on.name,
+                        "price" : add_on.price,
+                        "menu_items" : add_on.menu_items_id,
+                        "status" : add_on.status,
+                        "created_at" : add_on.created_at,
+                        "updated_at" : add_on.updated_at
+                    }
+                    return json_response(success=True, message=ErrorConst.ADD_ON_SAVED, result=response_data, status_code=status.HTTP_201_CREATED)
+                return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+               
+    def put(self,request,id=None):
+        try:
+            with transaction.atomic():
+                try:
+                   add_on= Menu_add_on_items.objects.get(id=id)
+                except Menu_add_on_items.DoesNotExist:
+                   return json_response(success=False, message=ErrorConst.INVALID_ADD_ON_ID, error=ErrorConst.INVALID_ADD_ON_ID, status_code=status.HTTP_400_BAD_REQUEST)
+                
+                data=request.data
+                name= data.get("name",None)
+                menu_items= data.get("menu_items_id", None)
+                price= data.get("price", None)
+                statusField= data.get("status", None)
+                required_fields= {
+                    "Name": name,
+                    "Item Id" : menu_items,
+                    "Price" : price,
+                }
+                if (validation_response := CheckValidations.check_missing_fields(required_fields=required_fields)):
+                    return validation_response
+                if statusField:
+                    if not CheckValidations.validate_status(statusField):
+                        return json_response(success=False, result={}, message=ErrorConst.INVALID_STATUS, error=ErrorConst.INVALID_STATUS, status_code=status.HTTP_400_BAD_REQUEST)    
+                
+                if Menu_add_on_items.objects.filter(name=name, menu_items=menu_items).exclude(id=add_on.id).exists():
+                    return json_response(success=False, message=ErrorConst.ADD_ON_EXISTS, error=ErrorConst.ADD_ON_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+                
+                if not Menu_items.objects.filter(id=menu_items).exists():
+                        return json_response(success=False, message=ErrorConst.ITEM_DOESNT_EXISTS, error=ErrorConst.ITEM_DOESNT_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+
+                add_on_data={
+                    "name" : name,
+                    "menu_items" : menu_items,
+                    "price" : price,
+                    "status" : statusField
+                }
+                add_on_data= {i:j for i,j in add_on_data.items() if j is not None}
+                serializer= MenuAddOnItemsSerializer(add_on, data=add_on_data)
+                if serializer.is_valid():
+                    add_on= serializer.save()
+                    response_data= {
+                        "id" : add_on.id,
+                        "name" : add_on.name,
+                        "price" : add_on.price,
+                        "menu_items" : add_on.menu_items_id,
+                        "status" : add_on.status,
+                        "created_at" : add_on.created_at,
+                        "updated_at" : add_on.updated_at
+                    }
+                    return json_response(success=True, message=ErrorConst.ADD_ON_UPDATED, result=response_data, status_code=status.HTTP_201_CREATED)
+                return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    def patch(self,request,id=None):
+        try:
+            with transaction.atomic():
+                try:
+                   add_on= Menu_add_on_items.objects.get(id=id)
+                except Menu_add_on_items.DoesNotExist:
+                   return json_response(success=False, message=ErrorConst.INVALID_ADD_ON_ID, error=ErrorConst.INVALID_ADD_ON_ID, status_code=status.HTTP_400_BAD_REQUEST)
+                data=request.data
+                name= data.get("name",None)
+                menu_items= data.get("menu_items_id", None)
+                price= data.get("price", None)
+                statusField= data.get("status", None)
+
+                if statusField:
+                    if not CheckValidations.validate_status(statusField):
+                        return json_response(success=False, result={}, message=ErrorConst.INVALID_STATUS, error=ErrorConst.INVALID_STATUS, status_code=status.HTTP_400_BAD_REQUEST)    
+                
+                if (name and not menu_items) or (menu_items and not name):
+                    return json_response(success=False, message=ErrorConst.NEED_BOTH_NAME_ITEM_ID, error=ErrorConst.NEED_BOTH_NAME_ITEM_ID, status_code=status.HTTP_400_BAD_REQUEST)               
+                elif(name and menu_items):
+                    if Menu_add_on_items.objects.filter(name=name, menu_items=menu_items).exclude(id=add_on.id).exists():
+                        return json_response(success=False, message=ErrorConst.ADD_ON_EXISTS, error=ErrorConst.ADD_ON_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+                
+                    if not Menu_items.objects.filter(id=menu_items).exists():
+                        return json_response(success=False, message=ErrorConst.ITEM_DOESNT_EXISTS, error=ErrorConst.ITEM_DOESNT_EXISTS, status_code=status.HTTP_400_BAD_REQUEST)
+
+                add_on_data={
+                    "name" : name,
+                    "menu_items" : menu_items,
+                    "price" : price,
+                    "status" : statusField
+                }
+                add_on_data= {i:j for i,j in add_on_data.items() if j is not None}
+                serializer= MenuAddOnItemsSerializer(add_on, data=add_on_data, partial=True)
+                if serializer.is_valid():
+                    add_on= serializer.save()
+                    response_data= {
+                        "id" : add_on.id,
+                        "name" : add_on.name,
+                        "price" : add_on.price,
+                        "menu_items" : add_on.menu_items_id,
+                        "status" : add_on.status,
+                        "created_at" : add_on.created_at,
+                        "updated_at" : add_on.updated_at
+                    }
+                    return json_response(success=True, message=ErrorConst.ADD_ON_UPDATED, result=response_data, status_code=status.HTTP_201_CREATED)
+                return json_response(success=False, message=ErrorConst.INVALID_DATA, error=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self,request,id=None):
+        try:
+            with transaction.atomic():
+                try:
+                   add_on = Menu_add_on_items.objects.get(id=id)
+                except Menu_add_on_items.DoesNotExist:
+                    return json_response(success=False, message=ErrorConst.INVALID_ADD_ON_ID, error=ErrorConst.INVALID_ADD_ON_ID, status_code=status.HTTP_400_BAD_REQUEST)
+                add_on.delete()
+                return json_response(success=True, message=ErrorConst.ADD_ON_DELETED,status_code=status.HTTP_200_OK)
         except Exception as e:
             return json_response(success=False, message=ErrorConst.INTERNAL_SERVER_ERROR, error= str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

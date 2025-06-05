@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterUser, UpdateUser, DeleteUser, UserLogOut, LoginView, ForgetPassword, OtpVerify, ResetPassword, ChangePassword, MenuCategory, MenuSubCategory, MenuItems
+from .views import RegisterUser, UpdateUser, DeleteUser, UserLogOut, LoginView, ForgetPassword, OtpVerify, ResetPassword, ChangePassword, MenuCategory, MenuSubCategory, MenuItems, MenuAddOnItem
 import uuid
 
 urlpatterns=[
@@ -17,5 +17,7 @@ urlpatterns=[
     path('restaurant/sub-category/',MenuSubCategory.as_view()),
     path('restaurant/sub-category/<uuid:id>/',MenuSubCategory.as_view()),
     path('restaurant/item/', MenuItems.as_view()),
-    path('restaurant/item/<uuid:id>/',MenuItems.as_view())
+    path('restaurant/item/<uuid:id>/',MenuItems.as_view()),
+    path('restaurant/addon/', MenuAddOnItem.as_view()),
+    path('restaurant/addon/<uuid:id>/', MenuAddOnItem.as_view())
 ]
