@@ -43,6 +43,7 @@ class ErrorConst:
     NEW_PASSWORD_REQUIRED= "New password is required"
     OTP_DOESNT_EXIST= "OTP doesn't exists!"
     FAILED_TO_SEND_OTP= "Failed to send OTP email."
+    CATEGORY_REQUIRED= "Missing category ID"
     CATEGORY_EXISTS= "Category already exists!"
     CATEGORY_DOESNT_EXISTS= "Category does not exists!"
     CATEGORY_SAVED= "Category saved successfully"
@@ -50,6 +51,7 @@ class ErrorConst:
     CATEGORY_UPDATED= "Category updated successfully"
     CATEGORY_DELETED= "Category deleted successfully"
     INVALID_SUB_CATEGORY_ID= "Invalid sub category ID"
+    SUBCATEGORY_REQUIRED= "Missing subcategory ID"
     SUB_CATEGORY_EXISTS= "SubCategory already exists!"
     SUB_CATEGORY_DOESNT_EXISTS= "Sub-Category does not exists!"
     SUB_CATEGORY_SAVED= "Sub Category saved successfully"
@@ -61,18 +63,29 @@ class ErrorConst:
     ITEM_EXISTS="Item already exists!"
     ITEM_DOESNT_EXISTS="Item does not exists!"
     ITEM_DELETED= "Item deleted successfully!"
+    ADD_ON_REQUIRED= "Add on ID required"
     ADD_ON_EXISTS= "Add On already exists for this item!"
     ADD_ON_SAVED= "Add On saved successfully"
     INVALID_ADD_ON_ID= "Invalid add on ID"
     ADD_ON_UPDATED= "Add On updated successfully"
     NEED_BOTH_NAME_ITEM_ID= "To update either name or item id, you need to provide both"
     ADD_ON_DELETED= "Add On deleted successfully"
-
-
-
-
-
-
+    INVALID_CART_CODE= "Invalid Cart Code"
+    ITEM_ADDED_TO_CART= "Item added to cart"
+    ITEM_DELETED_FROM_CART= "Item deleted from cart"
+    ITEM_NOT_IN_CART= "Item is not in cart"
+    ITEM_ID_REQUIRED= "Item Id is required"
+    INVALID_QUANTITY= "Invalid quantity"
+    CART_UPDATED= "Cart updated successfully"
+    CART_EMPTY= "Cart doesn't have any item"
+    ORDER_SAVED= "Order saved successfully"
+    CART_DOESNT_EXISTS= "Cart doesn't exist!"
+    CART_CODE_REQUIRED= "Cart code is required"
+    CANT_GET_USERS= "Can't get users"
+    NO_USERS_REGISTERED= "No users registered till now"
+    USERS_FETCHED= "Users fetched successfully"
+    USER_DOESNT_EXIST= "User doesnt exist!"
+    USER_PROFILE= "User profile fetched successfully"
 
 def refresh_utility_func(user):
     Refresh = RefreshToken.for_user(user)

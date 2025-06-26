@@ -31,7 +31,13 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['86bb-49-249-112-98.ngrok-free.app',
+# '127.0.0.1']
+
+# for testing
+ALLOWED_HOSTS = ['*']
+
+SECURE_SSL_REDIRECT = False
 
 
 
@@ -47,9 +53,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,6 +67,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# for testing
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -71,6 +84,18 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
 }    
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header. Example: "Bearer <your_token>"',
+        }
+    },
+}
+
 
 ROOT_URLCONF = 'Eatbit.urls'
 

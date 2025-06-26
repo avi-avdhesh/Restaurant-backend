@@ -25,7 +25,7 @@ class CheckValidations:
             if value in [None, '', []]:
                 missing_fields.append(field_name)
 
-            if missing_fields:     
+        if missing_fields:     
                 return json_response(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     success=False,

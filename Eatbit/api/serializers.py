@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel, UserDevice, UserSession, Otp, Menu_category, Menu_sub_category, Menu_items, Menu_add_on_items
+from .models import UserModel, UserDevice, UserSession, Otp, Menu_category, Menu_sub_category, Menu_items, Menu_add_on_items, Cart, CartItem, Order, OrderItems
 
 class UserSerializer(serializers.ModelSerializer):
     password= serializers.CharField(write_only=True)
@@ -77,3 +77,58 @@ class MenuAddOnItemsSerializer(serializers.ModelSerializer):
         if 'status' not in validated_data:
             validated_data['status'] = instance.status or Menu_sub_category._meta.get_field('status').default
         return super().update(instance, validated_data)     
+
+class CartItemSerializer(serializers.ModelSerializer):
+
+        item = MenuItemSerializer(read_only=True)
+        item_id = serializers.PrimaryKeyRelatedField(queryset= Menu_items.objects.all(), write_only= True, source="item")
+        cart_id = serializers.PrimaryKeyRelatedField(queryset= Cart.objects.all(), write_only=True, source= "cart")
+        sub_total= serializers.SerializerMethodField()
+
+        class Meta:
+            model= CartItem
+            fields = ["item","quantity","item_id","cart_id","sub_total"]
+        
+        def get_sub_total(self, cartitem):
+            return cartitem.quantity * cartitem.item.price
+
+        
+        def validate_quantity(self, value):
+            if value <= 0:
+                raise serializers.ValidationError("Quantity must be greater than zero.")
+            return value    
+
+class CartSerializer(serializers.ModelSerializer):
+
+    cart_items = CartItemSerializer(read_only=True, many=True)
+    cart_total = serializers.SerializerMethodField()
+    class Meta:
+        model = Cart
+        fields  =  ["cart_code","cart_items","cart_total","created_at","updated_at"] 
+        read_only_fields=["created_at","updated_at"]
+        
+    def get_cart_total(self, cart):
+        total_cart_items= cart.cart_items.all()
+        total = sum([item.quantity * item.item.price for item in total_cart_items])
+        return total
+
+class OrderItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model =OrderItems
+        fields=["order_id","item_name","price","quantity"]
+        write_only_fields=["order_id"]
+
+class OrderSerializer(serializers.ModelSerializer):
+    # order_items= OrderItemsSerializer(read_only=True, many=True)
+    class Meta:
+        model= Order
+        fields=["id", "order_no","user", "created_at","updated_at"]
+        read_only_fields=["order_no", "created_at","updated_at"]       
+
+
+
+
+
+
+
+

@@ -16,9 +16,28 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from api.authentication import CustomTokenAuthentication
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Restaurant API",
+        default_version='v1',
+        description="API documentation for Restaurant App",
+        contact=openapi.Contact(email="avdesh@appventurez.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    url= 'https://bedb-49-249-112-98.ngrok-free.app',
+    permission_classes=[permissions.AllowAny],
+    authentication_classes=[CustomTokenAuthentication],
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('', include('api.urls')),
+
 ]
